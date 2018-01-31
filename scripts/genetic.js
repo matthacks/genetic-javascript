@@ -1,27 +1,28 @@
 class Individual {
-  constructor(chromosomeLength, chromosomeString, goalString, mutationRate){
+  constructor(chromosomeLength, chromosomeString, goalString, mutationRate) {
     this.chromosomeLength = chromosomeLength;
     this.chromosomeString = chromosomeString;
     this.POSSIBLE_CHARACTERS = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ .!?";
     this.fitness = 0;
     this.mutationRate = mutationRate;
 
-    if(!this.chromosomeString){
+    if (!this.chromosomeString) {
       this.initializeChromosome();
     }
     this.setFitness(goalString);
   }
 
-  initializeChromosome(){
+  initializeChromosome() {
     for (var i = 0; i < this.chromosomeLength; i++) {
-      this.chromosomeString += this.POSSIBLE_CHARACTERS.charAt(Math.floor(Math.random()*this.POSSIBLE_CHARACTERS.length));
+      this.chromosomeString += this.POSSIBLE_CHARACTERS.charAt(Math.floor(Math.random() * this.POSSIBLE_CHARACTERS.length));
     }
   }
 
   setFitness(goalString) {
+    this.fitness = 0;
     for (var i = 0; i < this.chromosomeLength; i++) {
-      if (this.chromosomeString[i] === goalString[i]){
-        this.fitness += 1;
+      if (this.chromosomeString.charAt(i) === goalString.charAt(i)) {
+        this.fitness++;
       }
     }
   }
@@ -30,18 +31,18 @@ class Individual {
     //mutateValue gets a random number from 0-99, if this value is less
     //than the mutationRate than a mutation will occur at a randomly selected index
     //with a randomly selected character
-    let mutateValue = Math.floor(Math.random()*100);
+    let mutateValue = Math.floor(Math.random() * 100);
 
-    if(mutateValue < this.mutationRate){
-      let randIndex = Math.floor(Math.random()*this.chromosomeLength);
+    if (mutateValue < this.mutationRate) {
+      let randIndex = Math.floor(Math.random() * this.chromosomeLength);
       //since you cannot directly update a character at a given index for a string,
       //the following line accomplishes the same task
-      this.chromosomeString =  this.chromosomeString.substr(0, randIndex) + this.POSSIBLE_CHARACTERS.charAt(Math.floor(Math.random()*this.POSSIBLE_CHARACTERS.length)) + this.chromosomeString.substr(randIndex+1);
+      this.chromosomeString = this.chromosomeString.substr(0, randIndex) + this.POSSIBLE_CHARACTERS.charAt(Math.floor(Math.random() * this.POSSIBLE_CHARACTERS.length)) + this.chromosomeString.substr(randIndex + 1);
     }
 
   }
 
-  getFitness(){
+  getFitness() {
     return this.fitness;
   }
 
@@ -51,21 +52,19 @@ class Individual {
 
 
   //for testing
-  printChromosomeStringAndFitness(){
+  printChromosomeStringAndFitness() {
     console.log("String: " + this.chromosomeString + " Fitness: " + this.fitness);
   }
 
-}//end class Individual
+} //end class Individual
 
 //used for sorting population by descending fitness
-function compareIndividuals(a, b){
-  if(a.getFitness() < b.getFitness()){
+function compareIndividuals(a, b) {
+  if (a.getFitness() < b.getFitness()) {
     return 1;
-  }
-  else if (a.getFitness() > b.getFitness()) {
+  } else if (a.getFitness() > b.getFitness()) {
     return -1;
-  }
-  else{
+  } else {
     return 0;
   }
 }
@@ -73,7 +72,7 @@ function compareIndividuals(a, b){
 
 
 class Population {
-  constructor(populationSize, chromosomeLength, goalString, crossoverRate, mutationRate){
+  constructor(populationSize, chromosomeLength, goalString, crossoverRate, mutationRate) {
     this.population = [];
     this.populationSize = populationSize;
     this.fitnessSum = 0;
@@ -83,7 +82,7 @@ class Population {
     this.initializePopluation(populationSize, chromosomeLength, goalString, mutationRate);
   }
 
-  initializePopluation(populationSize, chromosomeLength, goalString, mutationRate){
+  initializePopluation(populationSize, chromosomeLength, goalString, mutationRate) {
     for (var i = 0; i < populationSize; i++) {
       var individual = new Individual(chromosomeLength, "", this.goalString, this.mutationRate);
       this.fitnessSum += individual.getFitness();
@@ -93,98 +92,100 @@ class Population {
     this.sortPopulationByDescendingFitness();
   }
 
-    getIndividual(index){
-      return population[index];
-    }
+  getIndividual(index) {
+    return population[index];
+  }
 
-    //uses roullete wheel selection
-    selectParent() {
-      let randomValueWithinFitnessSum = Math.floor(Math.random()*this.fitnessSum);
-      var temp = 0;
-      var i = 0;
+  //uses roullete wheel selection
+  selectParent() {
+    let randomValueWithinFitnessSum = Math.floor(Math.random() * this.fitnessSum);
+    var temp = 0;
+    var i = 0;
 
+    temp += this.population[i].getFitness();
+
+    while (temp < randomValueWithinFitnessSum) {
+      i++;
       temp += this.population[i].getFitness();
-
-      while(temp < randomValueWithinFitnessSum){
-        i++;
-        temp+=this.population[i].getFitness();
-      }
-
-      return this.population[i];
     }
 
-    //one child single point crossover
-    crossover(p1, p2){
-      let length = p1.getChromosomeString().length;
-      let crossoverIndex = Math.floor(Math.random()*length);
-      var i = 0;
-      var childChromosome = "";
+    return this.population[i];
+  }
 
-      while(i < crossoverIndex){
-        childChromosome += p1.getChromosomeString()[i];
-        i++;
-      }
+  //one child single point crossover
+  crossover(p1, p2) {
+    let length = p1.getChromosomeString().length;
+    let crossoverIndex = Math.floor(Math.random() * length);
+    var i = 0;
+    var childChromosome = "";
 
-      while(i < length){
-        childChromosome += p2.getChromosomeString()[i];
-        i++;
-      }
-
-      return new Individual(childChromosome.length, childChromosome, this.goalString, this.mutationRate);
+    while (i < crossoverIndex) {
+      childChromosome += p1.getChromosomeString()[i];
+      i++;
     }
 
-    sumFitness(){
-      this.fitnessSum = 0;
-      for (var i = 0; i < this.populationSize; i++) {
-        this.fitnessSum += this.population[i].getFitness();
-      }
+    while (i < length) {
+      childChromosome += p2.getChromosomeString()[i];
+      i++;
     }
 
-    giveBirth(){
-      let parent1 = this.selectParent();
+    return new Individual(childChromosome.length, childChromosome, this.goalString, this.mutationRate);
+  }
 
-      //select a random value between 0-99, if this value is less than
-      //our crossoverRate, we will select another parent and perform
-      //the crossover process, otherwise we use parent1 as the child and
-      //then perform the mutate process on it
-      let crossoverValue = Math.floor(Math.random()*100)
+  sumFitness() {
+    this.fitnessSum = 0;
+    for (var i = 0; i < this.populationSize; i++) {
+      this.fitnessSum += this.population[i].getFitness();
+    }
+  }
 
-      if(crossoverValue < this.crossoverRate){
-        let parent2 = this.selectParent();
-        var child = this.crossover(parent1, parent2);
-      }
-      else{
-        var child = parent1;
-      }
+  copyIndividual(a) {
+    return new Individual(a.getChromosomeString().length, a.getChromosomeString(), this.goalString, this.mutationRate)
+  }
 
-      child.mutate();
+  giveBirth() {
+    let parent1 = this.selectParent();
 
-      return child;
+    //select a random value between 0-99, if this value is less than
+    //our crossoverRate, we will select another parent and perform
+    //the crossover process, otherwise we use parent1 as the child and
+    //then perform the mutate process on it
+    let crossoverValue = Math.floor(Math.random() * 100)
+    var child = this.copyIndividual(parent1)
+    if (crossoverValue < this.crossoverRate) {
+      let parent2 = this.selectParent();
+      child = this.crossover(parent1, parent2);
     }
 
+    child.mutate();
+    child.setFitness(this.goalString);
 
-    sortPopulationByDescendingFitness(){
-      this.population.sort(compareIndividuals);
+    return child;
+  }
+
+
+  sortPopulationByDescendingFitness() {
+    this.population.sort(compareIndividuals);
+  }
+
+  generateNewPop() {
+    var newPopulation = [];
+
+    for (var i = 0; i < this.populationSize; i++) {
+      let newChild = this.giveBirth();
+      newPopulation.push(newChild);
     }
 
-    generateNewPop(){
-      var newPopulation = [];
+    this.population = newPopulation;
+    this.sumFitness();
+    this.sortPopulationByDescendingFitness();
+  }
 
-      for (var i = 0; i < this.populationSize; i++) {
-        let newChild = this.giveBirth();
-        newPopulation.push(newChild);
-      }
+  getMostFit() {
+    return this.population[0];
+  }
 
-      this.population = newPopulation;
-      this.sumFitness();
-      this.sortPopulationByDescendingFitness();
-    }
-
-    getMostFit(){
-      return this.population[0];
-    }
-
-}//end class Population
+} //end class Population
 
 //base functionality
 let POPULATION_SIZE = 100;
@@ -198,21 +199,21 @@ let p = new Population(POPULATION_SIZE, CHROMOSOME_LENGTH, GOAL_STRING, CROSSOVE
 var generation = 1;
 
 console.log("Generation: " + generation);
-console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness()/CHROMOSOME_LENGTH)*100 + "%");
+console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness() / CHROMOSOME_LENGTH) * 100 + "%");
 console.log(" ");
 
-while(p.getMostFit().getChromosomeString() !== GOAL_STRING){
+while (p.getMostFit().getChromosomeString() !== GOAL_STRING) {
 
   p.generateNewPop();
   generation++;
 
-  if(generation%LOG_EVERY_XTH_GENERATION === 0){
+  if (generation % LOG_EVERY_XTH_GENERATION === 0) {
     console.log("Generation: " + generation);
-    console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness()/CHROMOSOME_LENGTH)*100 + "%");
+    console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness() / CHROMOSOME_LENGTH) * 100 + "%");
     console.log(" ");
   }
 
 }
 
 console.log("Solution Found At Generation: " + generation);
-console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness()/CHROMOSOME_LENGTH)*100 + "%");
+console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness() / CHROMOSOME_LENGTH) * 100 + "%");
