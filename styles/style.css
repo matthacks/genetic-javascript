@@ -1,0 +1,23 @@
+h1 {
+  background-color: silver;
+  margin-bottom: 25px;
+  padding: 15px 50px;
+}
+
+.btn-lg {
+  background-color: silver;
+}
+
+.btn-lg:hover, .btn-lg:visited, .btn-lg:focus {
+  background-color: gray;
+  color: white;
+}
+
+.btn-lg:active {
+  opacity: .7;
+}
+
+.container {
+  text-align: center;
+  width: 70%;
+}
