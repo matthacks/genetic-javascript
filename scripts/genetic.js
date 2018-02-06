@@ -1,4 +1,19 @@
+/**
+ * @file
+ * This file contains the classes and functions necessary to run and manage
+ * a genetic algorithm.
+ */
+
+/** Represents an Individual member of a population. */
 class Individual {
+
+  /**
+   * @constructor
+   * @param {number} chromosomeLength - The length of the chromosome string.
+   * @param {string} chromosomeString - The chromosome string.
+   * @param {string} goalString - The string the GA is trying to create.
+   * @param {number} mutationRate - The % from 0-100 at which mutations will occur.
+   */
   constructor(chromosomeLength, chromosomeString, goalString, mutationRate) {
     this.chromosomeLength = chromosomeLength;
     this.chromosomeString = chromosomeString;
@@ -12,12 +27,22 @@ class Individual {
     this.setFitness(goalString);
   }
 
+  /**
+   * Initialize an empty chromosome string by selecting random characters from the
+   * POSSIBLE_CHARACTERS array and pushing them to chromosomeString one at a time for
+   * chromosomeLength times.
+   */
   initializeChromosome() {
     for (var i = 0; i < this.chromosomeLength; i++) {
       this.chromosomeString += this.POSSIBLE_CHARACTERS.charAt(Math.floor(Math.random() * this.POSSIBLE_CHARACTERS.length));
     }
   }
 
+  /**
+   * Counts how many characters in chromosomeString are an exact match and in the
+   * same index as the characters in goalString.
+   * @param {string} goalString The string to compare chromosomeString with.
+   */
   setFitness(goalString) {
     this.fitness = 0;
     for (var i = 0; i < this.chromosomeLength; i++) {
@@ -27,6 +52,7 @@ class Individual {
     }
   }
 
+  /** Perfoms a single point mutation 'mutationRate' out of 100 times. */
   mutate() {
     //mutateValue gets a random number from 0-99, if this value is less
     //than the mutationRate than a mutation will occur at a randomly selected index
@@ -42,23 +68,29 @@ class Individual {
 
   }
 
+  /**
+   * Get the fitness value of the individual.
+   * @return {number} The fitness value.
+   */
   getFitness() {
     return this.fitness;
   }
 
+  /**
+   * Get the chromosome string.
+   * @return {string} The chromosome string.
+   */
   getChromosomeString() {
     return this.chromosomeString;
   }
 
-
-  //for testing
-  printChromosomeStringAndFitness() {
-    console.log("String: " + this.chromosomeString + " Fitness: " + this.fitness);
-  }
-
 } //end class Individual
 
-//used for sorting population by descending fitness
+/**
+ * A comparison function used for sorting the individuals in population
+ * in order of descending fitness values.
+ * @return {number} Comparison value.
+ */
 function compareIndividuals(a, b) {
   if (a.getFitness() < b.getFitness()) {
     return 1;
@@ -69,9 +101,16 @@ function compareIndividuals(a, b) {
   }
 }
 
-
-
+/** Represents a Population of Individuals. */
 class Population {
+  /**
+   * @constructor
+   * @param {number} populationSize - Number of individuals the population will contain.
+   * @param {number} chromosomeLength - The length of the chromosome string.
+   * @param {string} goalString - The string the GA is trying to create.
+   * @param {number} crossoverRate - The % from 0-100 at which crossovers will occur.
+   * @param {number} mutationRate - The % from 0-100 at which mutations will occur.
+   */
   constructor(populationSize, chromosomeLength, goalString, crossoverRate, mutationRate) {
     this.population = [];
     this.populationSize = populationSize;
@@ -82,6 +121,13 @@ class Population {
     this.initializePopluation(populationSize, chromosomeLength, goalString, mutationRate);
   }
 
+  /**
+   * Create an array of 'populationSize' Individuals and then sort it by descending fitness.
+   * @param {number} populationSize - Number of individuals the population will contain.
+   * @param {number} chromosomeLength - The length of the chromosome string.
+   * @param {string} goalString - The string the GA is trying to create.
+   * @param {number} mutationRate - The % from 0-100 at which mutations will occur.
+   */
   initializePopluation(populationSize, chromosomeLength, goalString, mutationRate) {
     for (var i = 0; i < populationSize; i++) {
       var individual = new Individual(chromosomeLength, "", this.goalString, this.mutationRate);
@@ -92,11 +138,16 @@ class Population {
     this.sortPopulationByDescendingFitness();
   }
 
-  getIndividual(index) {
-    return population[index];
-  }
-
-  //uses roullete wheel selection
+  /**
+   * Select an individual from the population array using the roullete wheel selection
+   * technique. This works by selected a random number from 0 to the total fitness of
+   * the population. Iterate through the sorted individual array and sum the fitness
+   * from all the individuals iterated over. When the sum is greater than or equal to
+   * the random value, return that individual. The purpose of this improve chances
+   * for select more fit individuals for the next generation of individuals (eg an
+   * implementation for a varation of survival of the fittest).
+   * @return {Individual} Strategically selected individual.
+   */
   selectParent() {
     let randomValueWithinFitnessSum = Math.floor(Math.random() * this.fitnessSum);
     var temp = 0;
@@ -112,26 +163,38 @@ class Population {
     return this.population[i];
   }
 
-  //one child single point crossover
-  crossover(p1, p2) {
-    let length = p1.getChromosomeString().length;
+  /**
+   * Performs a single point crossover. A random index is selected from 0 to 'chromosomeLength' and
+   * a chromosome string is produced from the concatenation of parent1's chromosomeString
+   * from 0 to the random index and parent2's chromosomeString from random index +1 to
+   * chromosomeLength. An Indidual is then produced from that string and returned.
+   * @param {Individual} parent1 - The first parent.
+   * @param {Individual} parent2 - The second parent.
+   * @return {Individual} The Individual produced as a result of the crossover algorithm.
+   */
+  crossover(parent1, parent2) {
+    let length = parent1.getChromosomeString().length;
     let crossoverIndex = Math.floor(Math.random() * length);
     var i = 0;
     var childChromosome = "";
 
     while (i < crossoverIndex) {
-      childChromosome += p1.getChromosomeString()[i];
+      childChromosome += parent1.getChromosomeString()[i];
       i++;
     }
 
     while (i < length) {
-      childChromosome += p2.getChromosomeString()[i];
+      childChromosome += parent2.getChromosomeString()[i];
       i++;
     }
 
     return new Individual(childChromosome.length, childChromosome, this.goalString, this.mutationRate);
   }
 
+  /**
+   * Calculates the total population fitness by summing the fitness of every individual
+   * in the population.
+   */
   sumFitness() {
     this.fitnessSum = 0;
     for (var i = 0; i < this.populationSize; i++) {
@@ -139,18 +202,27 @@ class Population {
     }
   }
 
-  copyIndividual(a) {
-    return new Individual(a.getChromosomeString().length, a.getChromosomeString(), this.goalString, this.mutationRate)
+  /**
+   * Creates an copy of the passed in Individual.
+   * @param {Individual} individualToCopy - The individual to copy.
+   * @return {Individual} A new Individual instantiated from the values of the individualToCopy.
+   */
+  copyIndividual(individualToCopy) {
+    return new Individual(individualToCopy.getChromosomeString().length, individualToCopy.getChromosomeString(), this.goalString, this.mutationRate)
   }
 
+  /**
+   * Controls the genetic algorithm process of parent selection, crossover, and mutation.
+   * A random value between 0-99 is selected, if this value is less than
+   * our crossoverRate, we will select another parent and perform
+   * the crossover process, otherwise we use parent1 as the child and
+   * then perform the mutate process on it.
+   * @return {Individual} Individual created through GA processes.
+   */
   giveBirth() {
     let parent1 = this.selectParent();
-
-    //select a random value between 0-99, if this value is less than
-    //our crossoverRate, we will select another parent and perform
-    //the crossover process, otherwise we use parent1 as the child and
-    //then perform the mutate process on it
     let crossoverValue = Math.floor(Math.random() * 100)
+
     var child = this.copyIndividual(parent1)
     if (crossoverValue < this.crossoverRate) {
       let parent2 = this.selectParent();
@@ -163,11 +235,17 @@ class Population {
     return child;
   }
 
-
+  /** Sorts the array of Indivuals by fitness from greatest to least. */
   sortPopulationByDescendingFitness() {
     this.population.sort(compareIndividuals);
   }
 
+  /**
+   * Creates a new population by calling the 'giveBirth' method 'populationSize'
+   * times and appending each returned Individual to a new array. The array is then
+   * set as the Populations current array and then the 'sumFitness' and
+   * 'sortPopulationByDescendingFitness' operations are performed.
+   */
   generateNewPop() {
     var newPopulation = [];
 
@@ -181,6 +259,10 @@ class Population {
     this.sortPopulationByDescendingFitness();
   }
 
+  /**
+   * Get the most fit individual from the sorted population.
+   * @return {Individual} Individual at index 0.
+   */
   getMostFit() {
     return this.population[0];
   }
