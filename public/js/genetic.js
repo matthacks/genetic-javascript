@@ -269,33 +269,38 @@ class Population {
 
 } //end class Population
 
-//base functionality
-let POPULATION_SIZE = 100;
-let GOAL_STRING = "ThIS 1s SuP3r C00l!!";
-let CHROMOSOME_LENGTH = GOAL_STRING.length;
-let CROSSOVER_RATE = 80;
-let MUTATION_RATE = 10;
-let LOG_EVERY_XTH_GENERATION = 100;
+/**
+ * Used for testing; runs through the entire process of creating a population and
+ * iterively generating new ones until the goal string is generated
+ */
+module.exports = function testRun() {
+  let POPULATION_SIZE = 100;
+  let GOAL_STRING = "ThIS 1s SuP3r C00l!!";
+  let CHROMOSOME_LENGTH = GOAL_STRING.length;
+  let CROSSOVER_RATE = 80;
+  let MUTATION_RATE = 10;
+  let LOG_EVERY_XTH_GENERATION = 100;
 
-let p = new Population(POPULATION_SIZE, CHROMOSOME_LENGTH, GOAL_STRING, CROSSOVER_RATE, MUTATION_RATE);
-var generation = 1;
+  let p = new Population(POPULATION_SIZE, CHROMOSOME_LENGTH, GOAL_STRING, CROSSOVER_RATE, MUTATION_RATE);
+  var generation = 1;
 
-console.log("Generation: " + generation);
-console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness() / CHROMOSOME_LENGTH) * 100 + "%");
-console.log(" ");
+  console.log("Generation: " + generation);
+  console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness() / CHROMOSOME_LENGTH) * 100 + "%");
+  console.log(" ");
 
-while (p.getMostFit().getChromosomeString() !== GOAL_STRING) {
+  while (p.getMostFit().getChromosomeString() !== GOAL_STRING) {
 
-  p.generateNewPop();
-  generation++;
+    p.generateNewPop();
+    generation++;
 
-  if (generation % LOG_EVERY_XTH_GENERATION === 0) {
-    console.log("Generation: " + generation);
-    console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness() / CHROMOSOME_LENGTH) * 100 + "%");
-    console.log(" ");
+    if (generation % LOG_EVERY_XTH_GENERATION === 0) {
+      console.log("Generation: " + generation);
+      console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness() / CHROMOSOME_LENGTH) * 100 + "%");
+      console.log(" ");
+    }
+
   }
 
+  console.log("Solution Found At Generation: " + generation);
+  console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness() / CHROMOSOME_LENGTH) * 100 + "%");
 }
-
-console.log("Solution Found At Generation: " + generation);
-console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness() / CHROMOSOME_LENGTH) * 100 + "%");
