@@ -267,6 +267,14 @@ class Population {
     return this.population[0];
   }
 
+  /**
+   * Get the least fit individual from the sorted population.
+   * @return {Individual} Individual at the last index.
+   */
+  getLeastFit() {
+    return this.population[this.population.length - 1];
+  }
+
 } //end class Population
 
 /**
@@ -303,4 +311,9 @@ module.exports = function testRun() {
 
   console.log("Solution Found At Generation: " + generation);
   console.log("Most Fit Chromosome: \"" + p.getMostFit().getChromosomeString() + "\" With Fitness of: " + (p.getMostFit().getFitness() / CHROMOSOME_LENGTH) * 100 + "%");
+}
+
+module.exports = {
+  Population: Population,
+  Individual: Individual
 }
