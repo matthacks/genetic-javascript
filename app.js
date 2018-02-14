@@ -12,27 +12,52 @@ app.use(bodyParser.urlencoded({
 
 var GeneticClasses = require('./public/js/genetic.js');
 var population;
+var goalString;
+var populationSize;
+var mutationRate;
+var crossoverRate;
 
 app.get('/', function(req, res) {
   res.render("parameterFormPage");
 });
 
 app.post('/launchGeneticAlgorithm', function(req, res) {
-  var goalString = req.body.goalString;
-  var populationSize = req.body.populationSize;
-  var mutationRate = req.body.mutationRate;
-  var crossoverRate = req.body.crossoverRate;
+  goalString = req.body.goalString;
+  populationSize = req.body.populationSize;
+  mutationRate = req.body.mutationRate;
+  crossoverRate = req.body.crossoverRate;
   population = new GeneticClasses.Population(populationSize, goalString.length, goalString, crossoverRate, mutationRate);
   res.render("runGeneticAlgorithmPage", {
     goalString: goalString,
     populationSize: populationSize,
     mutationRate: mutationRate,
     crossoverRate: crossoverRate,
-    generationNumber: 1,
+    generationNumber: population.getGenerationNumber(),
     mostFitStrandChromosome: population.getMostFit().getChromosomeString(),
     leastFitStrandChromosome: population.getLeastFit().getChromosomeString(),
     mostFitStrandFitnessPercent: (population.getMostFit().getFitness()/goalString.length*100).toFixed(2),
-    leastFitStrandFitnessPercent: (population.getLeastFit().getFitness()/goalString.length*100).toFixed(2)
+    leastFitStrandFitnessPercent: (population.getLeastFit().getFitness()/goalString.length*100).toFixed(2),
+    previousStepsToTake: 1
+  });
+});
+
+app.post('/takeGeneticAlgorithmStep', function(req, res) {
+  var generationLoopCount = 0;
+  while (population.getMostFit().getChromosomeString() !== goalString && generationLoopCount < req.body.stepsToTake) {
+    generationLoopCount++;
+    population.generateNewPop();
+  }
+  res.render("runGeneticAlgorithmPage", {
+    goalString: goalString,
+    populationSize: populationSize,
+    mutationRate: mutationRate,
+    crossoverRate: crossoverRate,
+    generationNumber: population.getGenerationNumber(),
+    mostFitStrandChromosome: population.getMostFit().getChromosomeString(),
+    leastFitStrandChromosome: population.getLeastFit().getChromosomeString(),
+    mostFitStrandFitnessPercent: (population.getMostFit().getFitness()/goalString.length*100).toFixed(2),
+    leastFitStrandFitnessPercent: (population.getLeastFit().getFitness()/goalString.length*100).toFixed(2),
+    previousStepsToTake: req.body.stepsToTake
   });
 });
 

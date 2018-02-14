@@ -118,6 +118,7 @@ class Population {
     this.goalString = goalString;
     this.mutationRate = mutationRate;
     this.crossoverRate = crossoverRate;
+    this.generationNumber = 1;
     this.initializePopluation(populationSize, chromosomeLength, goalString, mutationRate);
   }
 
@@ -247,6 +248,7 @@ class Population {
    * 'sortPopulationByDescendingFitness' operations are performed.
    */
   generateNewPop() {
+    this.generationNumber++;
     var newPopulation = [];
 
     for (var i = 0; i < this.populationSize; i++) {
@@ -273,6 +275,14 @@ class Population {
    */
   getLeastFit() {
     return this.population[this.population.length - 1];
+  }
+
+  /**
+   * Get the generation number of the population.
+   * @return {number} Current generation number.
+   */
+  getGenerationNumber() {
+    return this.generationNumber;
   }
 
 } //end class Population
